@@ -1,16 +1,31 @@
-<p align="center">
-<img width="400" src="/assets/logo.png">
-</p>
+# CDB-SGLang
 
-# Mini-SGLang
+**Continuous depth batching for depth-adaptive looped language models.**
 
-A **lightweight yet high-performance** inference framework for Large Language Models.
+> [!WARNING]
+> **Work in progress.**
+> This repository currently contains the Mini-SGLang baseline.
+> Depth-adaptive looped model support and continuous depth batching are under development and are not yet implemented here.
+> The usage examples below describe the inherited baseline.
 
----
+## Project Scope
 
-Mini-SGLang is a compact implementation of [SGLang](https://github.com/sgl-project/sglang), designed to demystify the complexities of modern LLM serving systems. With a compact codebase of **~5,000 lines of Python**, it serves as both a capable inference engine and a transparent reference for researchers and developers.
+Looped language models reuse a recurrent core across multiple loop steps.
+Depth-adaptive inference lets each token exit that core after a different number of steps, allocating compute according to the token's needs.
+Continuous depth batching (CDB) forms new batches between loop steps, removing exited tokens and optionally refilling freed slots with new tokens to keep GPU execution efficient.
 
-## ✨ Key Features
+CDB-SGLang aims to bring this scheduling approach into a lightweight serving engine built on Mini-SGLang.
+The planned scope includes stage-wise scheduling, depth-aware KV caching, and asynchronous execution for depth-adaptive looped models.
+
+For the research implementation and experimental results, see [Continuous Depth Batching for Looped Language Models](https://github.com/LoopedLMs/looped-lm-continuous-batching) and the paper, [Depth-adaptive Inference of Looped Language Models via Continuous Depth Batching](https://arxiv.org/abs/2608.09444).
+
+## Attribution
+
+This independent codebase is based on [Mini-SGLang](https://github.com/sgl-project/mini-sglang), a compact implementation of [SGLang](https://github.com/sgl-project/sglang).
+The original MIT license and copyright notice are retained in [LICENSE](LICENSE).
+The baseline documentation and benchmark results below originate from Mini-SGLang and do not demonstrate CDB performance.
+
+## ✨ Inherited Baseline Features
 
 - **High Performance**: Achieves state-of-the-art throughput and latency with advanced optimizations.
 - **Lightweight & Readable**: A clean, modular, and fully type-annotated codebase that is easy to understand and modify.
@@ -40,11 +55,12 @@ source .venv/bin/activate
 
 ### 2. Installation
 
-Install Mini-SGLang directly from the source:
+Install CDB-SGLang directly from source.
+The Python package and CLI currently retain the `minisgl` name.
 
 ```bash
-git clone https://github.com/sgl-project/mini-sglang.git
-cd mini-sglang && uv venv --python=3.12 && source .venv/bin/activate
+git clone https://github.com/kschwethelm/cdb-sglang.git
+cd cdb-sglang && uv venv --python=3.12 && source .venv/bin/activate
 uv pip install -e .
 ```
 
@@ -63,11 +79,11 @@ Since Mini-SGLang requires Linux-specific dependencies, Windows users should use
    - Follow [NVIDIA's WSL2 CUDA guide](https://docs.nvidia.com/cuda/wsl-user-guide/index.html)
    - Ensure your Windows GPU drivers support WSL2
 
-3. **Install Mini-SGLang in WSL2**:
+3. **Install CDB-SGLang in WSL2**:
    ```bash
    # Inside WSL2 terminal
-   git clone https://github.com/sgl-project/mini-sglang.git
-   cd mini-sglang && uv venv --python=3.12 && source .venv/bin/activate
+   git clone https://github.com/kschwethelm/cdb-sglang.git
+   cd cdb-sglang && uv venv --python=3.12 && source .venv/bin/activate
    uv pip install -e .
    ```
 
@@ -136,11 +152,15 @@ python -m minisgl --model "Qwen/Qwen3-0.6B" --shell
 
 You can also use `/reset` to clear the chat history.
 
-## Benchmark
+## Upstream Baseline Benchmarks
+
+These benchmark results are inherited from Mini-SGLang.
+They have not been reproduced for CDB-SGLang and do not evaluate depth-adaptive looped models.
 
 ### Offline inference
 
-See [bench.py](./benchmark/offline/bench.py) for more details. Set `MINISGL_DISABLE_OVERLAP_SCHEDULING=1` for ablation study on overlap scheduling.
+See [bench.py](./benchmark/offline/bench.py) for more details.
+Set `MINISGL_DISABLE_OVERLAP_SCHEDULING=1` for ablation study on overlap scheduling.
 
 Test Configuration:
 
@@ -184,3 +204,19 @@ python3 -m sglang.launch_server --model "Qwen/Qwen3-32B" --tp 4 \
 
 - **[Detailed Features](./docs/features.md)**: Explore all available features and command-line arguments.
 - **[System Architecture](./docs/structures.md)**: Dive deep into the design and data flow of Mini-SGLang.
+
+## Citation
+
+If you use continuous depth batching in your work, please cite:
+
+```bibtex
+@misc{schwethelm2026cdb,
+      title={Depth-adaptive Inference of Looped Language Models via Continuous Depth Batching},
+      author={Kristian Schwethelm and Daniel Rueckert and Georgios Kaissis},
+      year={2026},
+      eprint={2608.09444},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2608.09444},
+}
+```
