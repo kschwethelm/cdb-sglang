@@ -31,3 +31,7 @@ env/
 # .vscode
 .vscode/
 .coverage
+
+# Local agent instructions and experiment outputs
+/AGENTS.md
+/outputs/
